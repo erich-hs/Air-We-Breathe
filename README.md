@@ -1,6 +1,4 @@
-<div id="top"></div>
-
-[![Contributors][contributors-shield]][contributors-url]
+[![Python application test with Github Actions](https://github.com/erich-hs/Air-We-Breath/actions/workflows/main.yml/badge.svg)](https://github.com/erich-hs/Air-We-Breath/actions/workflows/main.yml)
 
 ## About The Project
 Research on nonstationary multivariate time series modelling for missing value imputation and forecasting on air quality datasets.
@@ -10,8 +8,3 @@ As a study in progress with faculty members of the Mathematics & Statistics and 
 
 ## About this Repository
 This repository contains exploratory and development notebooks for the methods in study, as well as master datasets of currently explored air quality index stations.
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/erich-hs/Air-We-Breath.svg?style=for-the-badge
-[contributors-url]: https://github.com/erich-hs/Air-We-Breath/graphs/contributors
