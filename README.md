@@ -1,4 +1,4 @@
-[![Python application test with Github Actions](https://github.com/erich-hs/Air-We-Breath/actions/workflows/main.yml/badge.svg)](https://github.com/erich-hs/Air-We-Breath/actions/workflows/main.yml)
+[![Python application test with Github Actions](https://github.com/erich-hs/Air-We-Breath/actions/workflows/main.yml/badge.svg)](https://github.com/erich-hs/Air-We-Breath/actions/workflows/main.yml) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## About The Project
 Research on nonstationary multivariate time series modelling for missing value imputation and forecasting on air quality datasets.

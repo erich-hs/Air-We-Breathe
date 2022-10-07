@@ -23,3 +23,8 @@ dependencies:
 - pytorch
 # Jupyter Environment
 - jupyter
+# CI/CD
+- pylint
+- pytest
+- black
+- pytest-cov

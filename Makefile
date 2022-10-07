@@ -1,10 +1,12 @@
 install:
 	pip install --upgrade pip &&\
 		conda env create -f environment.yml
-		pip install fastai==2.7.9
+		conda update -n base -c defaults conda -y
+		pip install requirements.txt
 
-# format:
-#	black *.py
+format:
+	black *.ipynb
+	black *.py
 
 #lint:
 #	pylint --disable=R,C app.py
