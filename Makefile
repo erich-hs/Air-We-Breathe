@@ -1,6 +1,6 @@
 install:
 	pip install --upgrade pip &&\
-		conda env create -f env.yml
+		conda env create -f environment.yml
 		pip install fastai==2.7.9
 
 # format:
