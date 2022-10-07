@@ -1,6 +1,7 @@
 install:
 	pip install --upgrade pip &&\
-		pip install -r requirements.txt
+		conda env create -f env.yml
+		pip install fastai==2.7.9
 
 # format:
 #	black *.py

@@ -1,0 +1,25 @@
+name: air-we-breath
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=3.9
+- pip
+# Math and Stats
+- statsmodels
+- scipy
+- numpy
+# Data
+- pandas
+# Misc
+- tqdm
+- tabulate
+- glob2
+# Visualization
+- matplotlib
+- seaborn
+# Machine learning
+- scikit-learn
+- pytorch
+# Jupyter Environment
+- jupyter
