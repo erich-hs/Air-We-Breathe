@@ -5,8 +5,8 @@ install:
 format:
 	black *.py
 
-lint:
-	pylint --disable=R,C *.py
+#lint:
+#	pylint --disable=R,C app.py
 
 # test:
 #	#python -m pytest -vv test_flask_app.py
