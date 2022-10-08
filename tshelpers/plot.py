@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 # Seaborn style settings
 sns.set_theme(style="ticks", palette="mako")
@@ -44,9 +45,6 @@ def plot_sequence(
     if end is None:
         end = max(data[time])
 
-    # Standard visualization with seaborn lineplot
-    plt.figure(figsize=figsize)
-
     # Interval to plot
     if start < min(data[time]):
         print(
@@ -68,16 +66,43 @@ def plot_sequence(
             f"From {start:%H %p}, {start:%d-%b-%Y} to {end:%H %p}, {end:%d-%b-%Y}"
         )
 
-    # Lineplot
-    l = sns.lineplot(x=time, y=value, data=subset)
-    # Filling values to indicate NaN
-    l.fill_between(x=time, y1=value, data=subset, alpha=0.65)
+    # Interval length
+    days_total = (end-start).days + (end-start).seconds//3600//24
 
-    l.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
-    l.set_ylabel(y_label)
-    l.set_xlabel(x_label)
-    plt.suptitle(plot_sup_title, y=0.92, fontsize=12)
-    plt.xticks(rotation=x_rotate)
+    # Lineplot Matplotlib
+    fig, ax = plt.subplots(figsize=figsize)
+    # > Semester format
+    if days_total > 180:
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b, %Y"))
+        ax.xaxis.set_minor_locator(mdates.DayLocator(interval=7))
+    # > Monthly format
+    elif days_total > 30:
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=15))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.DayLocator())
+    # > Bi-weekly format
+    elif days_total > 14:
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=3))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.HourLocator(interval=12))
+    # > 5-days format
+    elif days_total > 5:
+        ax.xaxis.set_major_locator(mdates.DayLocator())
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.HourLocator(interval=2))
+    # <= 5-days format
+    else:
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.HourLocator())        
+    ax.plot(time, value, data=subset)
+    ax.fill_between(x=time, y1=value, data=subset, alpha=0.65)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
+    plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size-1)
+    fig.autofmt_xdate()
     plt.show()
 
 
@@ -87,14 +112,17 @@ def plot_compare(
     df_missing,
     time="DATE_PST",
     value="RAW_VALUE",
+    df_label="Imputed data",
+    df_missing_label="Real data",
     missing_range=None,
     start=None,
     end=None,
     y_label="PM 2.5",
     x_label="Date",
-    x_rotate=30,
     fill=True,
     color='orange',
+    lw=2,
+    linestyle='dashed',
     missing_only=True,
     plot_title=None,
     plot_sup_title=None,
@@ -107,13 +135,16 @@ def plot_compare(
     df_missing: Pandas DataFrame with a time series and a value column.
     time: DateTime variable in the dataset.
     value: Value variable or list of variables to subset with date column.
+    df_label: Label for lineplot on df value column.
+    df_missing_label: Label for lineplot on df_missing value column.
     missing_range: Optional missing range interval to subset df_missing.
     start: Start date for interval.
     end: End date for interval.
     y_label: Plot label for Y axis.
     x_label: Plot label for X axis.
-    x_rotate: Rotation angle for X axis ticks.
     color: Color for lineplot on df_missing value column.
+    lw: Line width for lineplot on df_missing value column.
+    linestyle: Line style for lineplot on df_missing value column.
     fill: Boolean argument to fill area underneath df1 lines.
     missing_only: Boolean arugment to plot only non-missing equivalent of df_missing.
     plot_title: Plot title.
@@ -137,9 +168,6 @@ def plot_compare(
     if end is None:
         end = max(df[time])
 
-    # Standard visualization with seaborn lineplot
-    plt.figure(figsize=figsize)
-
     # Interval to plot
     if start < min(df[time]):
         print(
@@ -162,15 +190,42 @@ def plot_compare(
             f"From {start:%H %p}, {start:%d-%b-%Y} to {end:%H %p}, {end:%d-%b-%Y}"
         )
 
-    # Lineplot
-    l1 = sns.lineplot(
-        x=time,
-        y=value,
-        data=df_missing,
-        hue=df_missing[value].isna().cumsum(),
-        palette=["black"] * sum(df_missing[value].isna()),
-        legend=False,
-    )
+    # Interval length
+    days_total = (end-start).days + (end-start).seconds//3600//24
+
+    # Mainplot with missing values (df_missing)
+    # Lineplot Matplotlib
+    fig, ax = plt.subplots(figsize=figsize)
+    # > Semester format
+    if days_total > 180:
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b, %Y"))
+        ax.xaxis.set_minor_locator(mdates.DayLocator(interval=7))
+    # > Monthly format
+    elif days_total > 30:
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=15))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.DayLocator())
+    # > Bi-weekly format
+    elif days_total > 14:
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=3))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.HourLocator(interval=12))
+    # > 5-days format
+    elif days_total > 5:
+        ax.xaxis.set_major_locator(mdates.DayLocator())
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.HourLocator(interval=2))
+    # <= 5-days format
+    else:
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+        ax.xaxis.set_minor_locator(mdates.HourLocator())
+    ax.plot(time, value, data=df_missing, label=df_missing_label)
+    if fill:
+        ax.fill_between(x=time, y1=value, data=df_missing, alpha=0.65)
+    
+    # Secondary plot with complete or imputed values (df)
     if missing_only:
         if missing_range is None:
             missing_index = np.where(df_missing[value].isnull())[0]
@@ -191,19 +246,22 @@ def plot_compare(
             )
         else:
             missing_index = missing_range
-        plt.plot(
-            time, value, data=df.iloc[missing_index], color=color, label="Missing"
-        )
+        ax.plot(time, value, data=df.iloc[missing_index],
+                color=color,
+                lw=lw,
+                linestyle=linestyle,
+                label=df_label)
     else:
-        plt.plot(time, value, data=df, color=color, label="Missing")
-    # Filling values to indicate NaN
-    if fill:
-        l1.fill_between(x=time, y1=value, data=df_missing, alpha=0.65)
-
-    l1.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
-    l1.set_ylabel(y_label)
-    l1.set_xlabel(x_label)
+        ax.plot(time, value, data=df,
+                color=color,
+                lw=lw,
+                linestyle=linestyle,
+                label=df_label)
+    
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
     plt.legend(loc="upper right", fontsize=font_size)
-    plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size)
-    plt.xticks(rotation=x_rotate)
+    plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size-1)
+    fig.autofmt_xdate()
     plt.show()
