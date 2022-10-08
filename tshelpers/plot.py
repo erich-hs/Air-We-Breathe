@@ -67,7 +67,7 @@ def plot_sequence(
         )
 
     # Interval length
-    days_total = (end-start).days + (end-start).seconds//3600//24
+    days_total = (end - start).days + (end - start).seconds // 3600 // 24
 
     # Lineplot Matplotlib
     fig, ax = plt.subplots(figsize=figsize)
@@ -95,13 +95,13 @@ def plot_sequence(
     else:
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-        ax.xaxis.set_minor_locator(mdates.HourLocator())        
+        ax.xaxis.set_minor_locator(mdates.HourLocator())
     ax.plot(time, value, data=subset)
     ax.fill_between(x=time, y1=value, data=subset, alpha=0.65)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
-    plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size-1)
+    plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
     fig.autofmt_xdate()
     plt.show()
 
@@ -120,9 +120,9 @@ def plot_compare(
     y_label="PM 2.5",
     x_label="Date",
     fill=True,
-    color='orange',
+    color="orange",
     lw=2,
-    linestyle='dashed',
+    linestyle="dashed",
     missing_only=True,
     plot_title=None,
     plot_sup_title=None,
@@ -191,7 +191,7 @@ def plot_compare(
         )
 
     # Interval length
-    days_total = (end-start).days + (end-start).seconds//3600//24
+    days_total = (end - start).days + (end - start).seconds // 3600 // 24
 
     # Mainplot with missing values (df_missing)
     # Lineplot Matplotlib
@@ -224,7 +224,7 @@ def plot_compare(
     ax.plot(time, value, data=df_missing, label=df_missing_label)
     if fill:
         ax.fill_between(x=time, y1=value, data=df_missing, alpha=0.65)
-    
+
     # Secondary plot with complete or imputed values (df)
     if missing_only:
         if missing_range is None:
@@ -236,7 +236,9 @@ def plot_compare(
                 missing_index, missing_index.shape[0], np.max(missing_index) + 1
             )
         elif type(missing_range) == type(pd.DataFrame()):
-            missing_range = missing_range[(missing_range[time] >= start) & (missing_range[time] <= end)]
+            missing_range = missing_range[
+                (missing_range[time] >= start) & (missing_range[time] <= end)
+            ]
             missing_index = np.where(missing_range[value].isnull())[0]
             # Including previous observation
             missing_index = np.insert(missing_index, 0, np.min(missing_index) - 1)
@@ -246,22 +248,30 @@ def plot_compare(
             )
         else:
             missing_index = missing_range
-        ax.plot(time, value, data=df.iloc[missing_index],
-                color=color,
-                lw=lw,
-                linestyle=linestyle,
-                label=df_label)
+        ax.plot(
+            time,
+            value,
+            data=df.iloc[missing_index],
+            color=color,
+            lw=lw,
+            linestyle=linestyle,
+            label=df_label,
+        )
     else:
-        ax.plot(time, value, data=df,
-                color=color,
-                lw=lw,
-                linestyle=linestyle,
-                label=df_label)
-    
+        ax.plot(
+            time,
+            value,
+            data=df,
+            color=color,
+            lw=lw,
+            linestyle=linestyle,
+            label=df_label,
+        )
+
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
     plt.legend(loc="upper right", fontsize=font_size)
-    plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size-1)
+    plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
     fig.autofmt_xdate()
     plt.show()
