@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -86,12 +87,14 @@ def plot_compare(
     df_missing,
     time="DATE_PST",
     value="RAW_VALUE",
+    missing_range=None,
     start=None,
     end=None,
     y_label="PM 2.5",
     x_label="Date",
     x_rotate=30,
     fill=True,
+    color='orange',
     missing_only=True,
     plot_title=None,
     plot_sup_title=None,
@@ -104,11 +107,13 @@ def plot_compare(
     df_missing: Pandas DataFrame with a time series and a value column.
     time: DateTime variable in the dataset.
     value: Value variable or list of variables to subset with date column.
+    missing_range: Optional missing range interval to subset df_missing.
     start: Start date for interval.
     end: End date for interval.
     y_label: Plot label for Y axis.
     x_label: Plot label for X axis.
     x_rotate: Rotation angle for X axis ticks.
+    color: Color for lineplot on df_missing value column.
     fill: Boolean argument to fill area underneath df1 lines.
     missing_only: Boolean arugment to plot only non-missing equivalent of df_missing.
     plot_title: Plot title.
@@ -167,18 +172,30 @@ def plot_compare(
         legend=False,
     )
     if missing_only:
-        missing_index = np.where(df_missing[value].isnull())[0]
-        # Including previous observation
-        missing_index = np.insert(missing_index, 0, np.min(missing_index) - 1)
-        # Including subsequent observation
-        missing_index = np.insert(
-            missing_index, missing_index.shape[0], np.max(missing_index) + 1
-        )
+        if missing_range is None:
+            missing_index = np.where(df_missing[value].isnull())[0]
+            # Including previous observation
+            missing_index = np.insert(missing_index, 0, np.min(missing_index) - 1)
+            # Including subsequent observation
+            missing_index = np.insert(
+                missing_index, missing_index.shape[0], np.max(missing_index) + 1
+            )
+        elif type(missing_range) == type(pd.DataFrame()):
+            missing_range = missing_range[(missing_range[time] >= start) & (missing_range[time] <= end)]
+            missing_index = np.where(missing_range[value].isnull())[0]
+            # Including previous observation
+            missing_index = np.insert(missing_index, 0, np.min(missing_index) - 1)
+            # Including subsequent observation
+            missing_index = np.insert(
+                missing_index, missing_index.shape[0], np.max(missing_index) + 1
+            )
+        else:
+            missing_index = missing_range
         plt.plot(
-            time, value, data=df.iloc[missing_index], color="orange", label="Missing"
+            time, value, data=df.iloc[missing_index], color=color, label="Missing"
         )
     else:
-        plt.plot(time, value, data=df, color="orange", label="Missing")
+        plt.plot(time, value, data=df, color=color, label="Missing")
     # Filling values to indicate NaN
     if fill:
         l1.fill_between(x=time, y1=value, data=df_missing, alpha=0.65)
