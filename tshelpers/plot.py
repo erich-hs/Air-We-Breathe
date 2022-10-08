@@ -79,6 +79,7 @@ def plot_sequence(
     plt.xticks(rotation=x_rotate)
     plt.show()
 
+
 # Auxiliar function to plot overlaying subsets
 def plot_compare(
     df,

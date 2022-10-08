@@ -2,11 +2,11 @@ install:
 	pip install --upgrade pip &&\
 		conda env create -f environment.yml
 		conda update -n base -c defaults conda -y
-		pip install requirements.txt
+		pip install -r requirements.txt
 
 format:
 	black *.ipynb
-	black *.py
+	black tshelpers/*.py
 
 #lint:
 #	pylint --disable=R,C app.py

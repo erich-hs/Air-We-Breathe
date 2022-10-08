@@ -148,6 +148,7 @@ def subset_interval(
 
     return (start_date_exp, end_date_exp)
 
+
 # Auxiliar function to generate artificially missing data
 def create_missing(
     data,
