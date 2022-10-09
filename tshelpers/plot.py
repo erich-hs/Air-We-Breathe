@@ -132,7 +132,8 @@ def plot_compare(
     """
     Plot times series subset within passed start and end date interval.
     df: Pandas DataFrame with a time series and a value column.
-    df_missing: Pandas DataFrame with a time series and a value column.
+    df_missing: Pandas DataFrame with a time series of the same length as
+    the one in df and a value column.
     time: DateTime variable in the dataset.
     value: Value variable or list of variables to subset with date column.
     df_label: Label for lineplot on df value column.
@@ -155,6 +156,12 @@ def plot_compare(
     sns.set_theme(style="ticks", palette="mako")
     warnings.filterwarnings("ignore", category=UserWarning)
 
+    # Assert time column of data is a datetime object
+    assert pd.api.types.is_datetime64_any_dtype(
+        data[time]
+    ), f"Column {time} should be of date time format."
+
+    # Assert sequence of df matches the one of df_missing
     assert len(df) == len(df_missing), "Sequences must be of the same length."
     assert min(df[time]) == min(
         df_missing[time]

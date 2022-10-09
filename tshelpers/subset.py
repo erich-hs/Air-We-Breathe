@@ -29,9 +29,18 @@ def subset_interval(
     missing_type: Type of missing value to search for. Either 'IMV' or 'CMS'.
     sequence_no: Which missing interval to use in the sequence of missing_type found.
     days_prior: Amount of days to subset prior to the missing_type interval.
-    days_later: Amount of days to subsat after the missing_type interval.
+    days_later: Amount of days to subset after the missing_type interval.
     returns: (start_date, end_date) sequence.
     """
+    # Assert time column of data is a datetime object
+    assert pd.api.types.is_datetime64_any_dtype(
+        data[time]
+    ), f"Column {time} should be of date time format."
+    assert missing_type.upper() in [
+        "IMV",
+        "CMS",
+    ], f"missing_type should be 'IMV' or 'CMS', got {missing_type}."
+
     # Subsetting to missing values
     if missing_type == "IMV":
         subset = data[data[column_type_missing] == 0]
@@ -69,10 +78,11 @@ def subset_interval(
             end = start + timedelta(hours=row[column_missing_sequence])
 
         # Appending start and end date for newly found sequences
-        if start not in start_list:
-            start_list.append(start)
-        if end not in end_list:
-            end_list.append(end)
+        if (not pd.isnull(start)) and (not pd.isnull(end)):
+            if start not in start_list:
+                start_list.append(start)
+            if end not in end_list:
+                end_list.append(end)
 
     # Printing start and end lists for sequence sizes
     length = []
@@ -84,28 +94,30 @@ def subset_interval(
         {"Sequence Start": start_list, "Sequence End": end_list, "Length": length}
     )
     if verbose:
-        print("Missing value sequences found with current argument:")
+        print(
+            f"{len(length)} {missing_type} missing value sequences found with current arguments:"
+        )
         print(tabulate(sequences_df, headers="keys", tablefmt="psql"), "\n")
 
-    # Sequence to return
+    # Sequence to return (_exp suffix stands for expanded dates)
     start_date = start_list[sequence_no]
     end_date = end_list[sequence_no]
     start_date_exp = start_date - timedelta(days=days_prior)
     end_date_exp = end_date + timedelta(days=days_later)
 
-    # Checking for end date falling within a missing sequence
-    if (end_date_exp >= start_list[sequence_no + 1]) and (
-        end_date_exp <= end_list[sequence_no + 1]
-    ):
-        if verbose:
-            print(
-                "WARNING: Sequence ending on a missing interval. Expanding to incorporate next sequence..."
-            )
-        end_date = end_list[sequence_no + 1]
-        end_date_exp = end_date + timedelta(days=days_later)
-
-    # Checking for start date falling within a missing sequence
     try:
+        # Checking for end date falling within a missing sequence
+        if (end_date_exp >= start_list[sequence_no + 1]) and (
+            end_date_exp <= end_list[sequence_no + 1]
+        ):
+            if verbose:
+                print(
+                    "WARNING: Sequence ending on a missing interval. Expanding to incorporate next sequence..."
+                )
+            end_date = end_list[sequence_no + 1]
+            end_date_exp = end_date + timedelta(days=days_later)
+
+        # Checking for start date falling within a missing sequence
         if (start_date_exp >= start_list[sequence_no - 1]) and (
             start_date_exp <= end_list[sequence_no - 1]
         ):
@@ -130,18 +142,23 @@ def subset_interval(
             )
             print(f"Sum of {missing_type} sequence(s) length(s): {missing_tot} hours")
 
-    if start_date_exp < min(subset[time]):
+    # Checking for start and end dates falling outside original dataset time range
+    # if start_date_exp < min(subset[time]):
+    if start_date_exp < min(data[time]):
         if verbose:
             print(
                 f"WARNING: Sequence start exceeds subset limit. Truncating to subset start date..."
             )
-        start_date_exp = min(subset[time]) - timedelta(days=days_prior)
-    if end_date_exp > max(subset[time]):
+        # start_date_exp = min(subset[time]) - timedelta(days=days_prior)
+        start_date_exp = min(data[time])
+    # if end_date_exp > max(subset[time]):
+    if end_date_exp > max(data[time]):
         if verbose:
             print(
                 f"WARNING: Sequence end exceeds subset limit. Truncating to subset end date..."
             )
-        end_date_exp = max(subset[time]) + timedelta(days=days_later)
+        # end_date_exp = max(subset[time]) + timedelta(days=days_later)
+        end_date_exp = max(data[time])
 
     if verbose:
         print(f"Final interval{(str(start_date_exp), str(end_date_exp))}")
@@ -174,10 +191,20 @@ def create_missing(
     start and end arguments, and df_missing is a copy of subset with missing
     data.
     """
+    # Assert time column of data is a datetime object
+    assert pd.api.types.is_datetime64_any_dtype(
+        data[time]
+    ), f"Column {time} should be of date time format."
+
     if start is None:
         start = min(data[time])
     if end is None:
         end = max(data[time])
+
+    assert end > start, f"End date should be higher than start date."
+    assert (end - start) < (
+        max(data[time]) - min(data[time])
+    ), f"Sequence length should not exceed subset {time} length."
 
     # Interval to subset
     if start <= min(data[time]):
