@@ -17,7 +17,6 @@ def plot_sequence(
     end=None,
     y_label="PM 2.5",
     x_label="Date",
-    x_rotate=30,
     plot_title=None,
     plot_sup_title=None,
     font_size=12,
@@ -32,7 +31,6 @@ def plot_sequence(
     end: End date for interval.
     y_label: Plot label for Y axis.
     x_label: Plot label for X axis.
-    x_rotate: Rotation angle for X axis ticks.
     plot_title: Plot title.
     plot_sup_title: Plot sub-title.
     font_size: Plot tile font size.
@@ -91,11 +89,16 @@ def plot_sequence(
         ax.xaxis.set_major_locator(mdates.DayLocator())
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
         ax.xaxis.set_minor_locator(mdates.HourLocator(interval=2))
-    # <= 5-days format
-    else:
+    # > 1-day format
+    elif days_total > 1:
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
         ax.xaxis.set_minor_locator(mdates.HourLocator())
+    # <= 1-day format
+    else:
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H %p"))
+        ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=15))
     ax.plot(time, value, data=subset)
     ax.fill_between(x=time, y1=value, data=subset, alpha=0.65)
     ax.set_xlabel(x_label)
@@ -227,11 +230,16 @@ def plot_compare(
         ax.xaxis.set_major_locator(mdates.DayLocator())
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
         ax.xaxis.set_minor_locator(mdates.HourLocator(interval=2))
-    # <= 5-days format
-    else:
+    # > 1-day format
+    elif days_total > 1:
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=6))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
         ax.xaxis.set_minor_locator(mdates.HourLocator())
+    # <= 1-day format
+    else:
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H %p"))
+        ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=15))
     ax.plot(time, value, data=df_missing, label=df_missing_label)
     if fill:
         ax.fill_between(x=time, y1=value, data=df_missing, alpha=0.65)
