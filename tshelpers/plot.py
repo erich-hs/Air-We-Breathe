@@ -156,10 +156,14 @@ def plot_compare(
     sns.set_theme(style="ticks", palette="mako")
     warnings.filterwarnings("ignore", category=UserWarning)
 
-    # Assert time column of data is a datetime object
+    # Assert time columns of df and df_missing are datetime objects
     assert pd.api.types.is_datetime64_any_dtype(
-        data[time]
-    ), f"Column {time} should be of date time format."
+        df[time]
+    ), f"Column {time} of {df} should be of date time format."
+
+    assert pd.api.types.is_datetime64_any_dtype(
+        df_missing[time]
+    ), f"Column {time} of {df_missing} should be of date time format."
 
     # Assert sequence of df matches the one of df_missing
     assert len(df) == len(df_missing), "Sequences must be of the same length."
