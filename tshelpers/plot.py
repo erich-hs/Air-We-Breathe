@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.ticker as ticker
 
 # Seaborn style settings
 sns.set_theme(style="ticks", palette="mako")
@@ -111,12 +112,12 @@ def plot_sequence(
 
 # Auxiliar function to plot overlaying subsets
 def plot_compare(
-    df,
-    df_missing,
+    data,
+    data_missing,
     time="DATE_PST",
     value="RAW_VALUE",
-    df_label="Imputed data",
-    df_missing_label="Real data",
+    data_label="Imputed data",
+    data_missing_label="Real data",
     missing_range=None,
     start=None,
     end=None,
@@ -134,23 +135,23 @@ def plot_compare(
 ):
     """
     Plot times series subset within passed start and end date interval.
-    df: Pandas DataFrame with a time series and a value column.
-    df_missing: Pandas DataFrame with a time series of the same length as
-    the one in df and a value column.
+    data: Pandas DataFrame with a time series and a value column.
+    data_missing: Pandas DataFrame with a time series of the same length as
+    the one in data and a value column.
     time: DateTime variable in the dataset.
     value: Value variable or list of variables to subset with date column.
-    df_label: Label for lineplot on df value column.
-    df_missing_label: Label for lineplot on df_missing value column.
-    missing_range: Optional missing range interval to subset df_missing.
+    data_label: Label for lineplot on data value column.
+    data_missing_label: Label for lineplot on data_missing value column.
+    missing_range: Optional missing range interval to subset data_missing.
     start: Start date for interval.
     end: End date for interval.
     y_label: Plot label for Y axis.
     x_label: Plot label for X axis.
-    color: Color for lineplot on df_missing value column.
-    lw: Line width for lineplot on df_missing value column.
-    linestyle: Line style for lineplot on df_missing value column.
-    fill: Boolean argument to fill area underneath df1 lines.
-    missing_only: Boolean arugment to plot only non-missing equivalent of df_missing.
+    color: Color for lineplot on data_missing value column.
+    lw: Line width for lineplot on data_missing value column.
+    linestyle: Line style for lineplot on data_missing value column.
+    fill: Boolean argument to fill area underneath data lines.
+    missing_only: Boolean arugment to plot only non-missing equivalent of data_missing.
     plot_title: Plot title.
     plot_sup_title: Plot sub-title.
     font_size: Plot tile font size.
@@ -159,42 +160,42 @@ def plot_compare(
     sns.set_theme(style="ticks", palette="mako")
     warnings.filterwarnings("ignore", category=UserWarning)
 
-    # Assert time columns of df and df_missing are datetime objects
+    # Assert time columns of data and data_missing are datetime objects
     assert pd.api.types.is_datetime64_any_dtype(
-        df[time]
-    ), f"Column {time} of {df} should be of date time format."
+        data[time]
+    ), f"Column {time} of {data} should be of date time format."
 
     assert pd.api.types.is_datetime64_any_dtype(
-        df_missing[time]
-    ), f"Column {time} of {df_missing} should be of date time format."
+        data_missing[time]
+    ), f"Column {time} of {data_missing} should be of date time format."
 
     # Assert sequence of df matches the one of df_missing
-    assert len(df) == len(df_missing), "Sequences must be of the same length."
-    assert min(df[time]) == min(
-        df_missing[time]
+    assert len(data) == len(data_missing), "Sequences must be of the same length."
+    assert min(data[time]) == min(
+        data_missing[time]
     ), "Sequences do not start at the same time stamp."
-    assert max(df[time]) == max(
-        df_missing[time]
+    assert max(data[time]) == max(
+        data_missing[time]
     ), "Sequences do not end at the same time stamp."
 
     if start is None:
-        start = min(df[time])
+        start = min(data[time])
     if end is None:
-        end = max(df[time])
+        end = max(data[time])
 
     # Interval to plot
-    if start < min(df[time]):
+    if start < min(data[time]):
         print(
             "WARNING: Plot start exceeds subset limit. Truncating to subset start date..."
         )
-        start = min(df[time])
-    if end > max(df[time]):
+        start = min(data[time])
+    if end > max(data[time]):
         print(
             "WARNING: Plot end exceeds subset limit. Truncating to subset end date..."
         )
-        end = max(df[time])
-    df = df[(df[time] >= start) & (df[time] <= end)]
-    df_missing = df_missing[(df_missing[time] >= start) & (df_missing[time] <= end)]
+        end = max(data[time])
+    data = data[(data[time] >= start) & (data[time] <= end)]
+    data_missing = data_missing[(data_missing[time] >= start) & (data_missing[time] <= end)]
 
     # Title and subtitle
     if plot_title is None:
@@ -207,7 +208,7 @@ def plot_compare(
     # Interval length
     days_total = (end - start).days + (end - start).seconds // 3600 // 24
 
-    # Mainplot with missing values (df_missing)
+    # Mainplot with missing values (data_missing)
     # Lineplot Matplotlib
     fig, ax = plt.subplots(figsize=figsize)
     # > Semester format
@@ -240,14 +241,14 @@ def plot_compare(
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H %p"))
         ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=15))
-    ax.plot(time, value, data=df_missing, label=df_missing_label)
+    ax.plot(time, value, data=data_missing, label=data_missing_label)
     if fill:
-        ax.fill_between(x=time, y1=value, data=df_missing, alpha=0.65)
+        ax.fill_between(x=time, y1=value, data=data_missing, alpha=0.65)
 
-    # Secondary plot with complete or imputed values (df)
+    # Secondary plot with complete or imputed values (data)
     if missing_only:
         if missing_range is None:
-            missing_index = np.where(df_missing[value].isnull())[0]
+            missing_index = np.where(data_missing[value].isnull())[0]
             # Including previous observation
             missing_index = np.insert(missing_index, 0, np.min(missing_index) - 1)
             # Including subsequent observation
@@ -270,21 +271,21 @@ def plot_compare(
         ax.plot(
             time,
             value,
-            data=df.iloc[missing_index],
+            data=data.iloc[missing_index],
             color=color,
             lw=lw,
             linestyle=linestyle,
-            label=df_label,
+            label=data_label,
         )
     else:
         ax.plot(
             time,
             value,
-            data=df,
+            data=data,
             color=color,
             lw=lw,
             linestyle=linestyle,
-            label=df_label,
+            label=data_label,
         )
 
     ax.set_xlabel(x_label)
@@ -292,5 +293,82 @@ def plot_compare(
     ax.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
     plt.legend(loc="upper right", fontsize=font_size)
     plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
+    fig.autofmt_xdate()
+    plt.show()
+
+def plot_missing(data,
+                 start=None,
+                 end=None,
+                 plot_title=None,
+                 plot_sup_title=None,
+                 annotate_missing=True,
+                 font_size=12,
+                 figsize=(12, 3)):
+    '''
+    data: Pandas DataFrame with a time series and a value column.
+    start: Start date for interval.
+    end: End date for interval.
+    plot_title: Plot title.
+    plot_sup_title: Plot sub-title.
+    annotate_missing: Boolean argument to specify whether to annotate missing values.
+    font_size: Plot tile font size.
+    figsize: Plot canvas size.
+    '''
+
+    x_tick = 16
+
+    if start is None:
+        start = min(data.index)
+    if end is None:
+        end = max(data.index)
+
+    # Title and subtitle
+    if plot_title is None:
+        plot_title = f"PM 2.5 Missing Values Heatmap"
+    if plot_sup_title is None:
+        plot_sup_title = (
+            f"From {start:%H %p}, {start:%d-%b-%Y} to {end:%H %p}, {end:%d-%b-%Y}"
+        )
+
+    # Interval to plot
+    if start < min(data.index):
+        print(
+            "WARNING: Plot start exceeds subset limit. Truncating to subset start date..."
+        )
+        start = min(data.index)
+    if end > max(data.index):
+        print(
+            "WARNING: Plot end exceeds subset limit. Truncating to subset end date..."
+        )
+        end = max(data.index)
+    data = data[(data.index >= start) & (data.index <= end)]
+
+    # Tick Labels
+    if annotate_missing:
+        ytick_labels=[station[:-5].replace("_", " ") + f"\nMissing: {round(data[station].isna().sum()/data[station].count()*100, 2)}%" for station in data.columns]
+    else:
+        ytick_labels=[station[:-5].replace("_", " ") for station in data.columns]
+
+
+    fig, ax = plt.subplots()
+    sns.heatmap(data.isnull().T, cbar=False)
+    ax.figure.set_size_inches(figsize)
+    ax.xaxis.set_major_locator(ticker.LinearLocator(x_tick))
+    ax.set_xticklabels(
+        [
+            timestamp.strftime("%d %b, %Y")
+            for timestamp in pd.date_range(
+                start=start,
+                end=end,
+                periods=len(ax.get_xticks()),
+            ).to_list()
+        ],
+        fontsize=font_size - 2,
+    )
+    ax.set_yticklabels(ytick_labels, fontsize=font_size - 2)
+    ax.set_xlabel("Date", fontsize=font_size - 1, fontweight="bold")
+    ax.set_ylabel("Stations", fontsize=font_size - 1, fontweight="bold")
+    ax.set_title(plot_title, y=1.08, fontsize=font_size, fontweight="bold")
+    plt.suptitle(plot_sup_title, y=0.94, fontsize=font_size - 1)
     fig.autofmt_xdate()
     plt.show()
