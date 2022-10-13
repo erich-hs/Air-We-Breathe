@@ -6,22 +6,22 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 
-# Seaborn style settings
-sns.set_theme(style="ticks", palette="mako")
-
 # Auxiliar function to plot a subset
 def plot_sequence(
     data,
-    time="DATE_PST",
-    value="RAW_VALUE",
+    time=None,
+    value=None,
     start=None,
     end=None,
     y_label="PM 2.5",
     x_label="Date",
+    fill=True,
     plot_title=None,
     plot_sup_title=None,
     font_size=12,
     figsize=(15, 5),
+    palette="viridis",
+    style="ticks"
 ):
     """
     Plot times series subset within passed start and end date interval.
@@ -32,30 +32,44 @@ def plot_sequence(
     end: End date for interval.
     y_label: Plot label for Y axis.
     x_label: Plot label for X axis.
+    fill: Boolean argument to fill area underneath data lines.
     plot_title: Plot title.
     plot_sup_title: Plot sub-title.
     font_size: Plot tile font size.
     figsize: Plot canvas size.
+    palette: Seaborn color palette.
+    style: Seaborn plot style.
     """
-    sns.set_theme(style="ticks", palette="mako")
+    sns.set_theme(style=style, palette=palette)
+
+    if type(data.index) == pd.core.indexes.datetimes.DatetimeIndex:
+        time_index = data.index
+        time_is_index = 1
+    else:
+        try:
+            min(data[time])
+        except KeyError:
+            print(f"Dataframe index is not a DateTime object. Please specify a valid column for argument time.")
+        time_index = data[time]
+        time_is_index = 0
 
     if start is None:
-        start = min(data[time])
+        start = min(time_index)
     if end is None:
-        end = max(data[time])
+        end = max(time_index)
 
     # Interval to plot
-    if start < min(data[time]):
+    if start < min(time_index):
         print(
             "WARNING: Plot start exceeds subset limit. Truncating to subset start date..."
         )
-        start = min(data[time])
-    if end > max(data[time]):
+        start = min(time_index)
+    if end > max(time_index):
         print(
             "WARNING: Plot end exceeds subset limit. Truncating to subset end date..."
         )
-        end = max(data[time])
-    subset = data[(data[time] >= start) & (data[time] <= end)]
+        end = max(time_index)
+    subset = data[(time_index >= start) & (time_index <= end)]
 
     # Title and subtitle
     if plot_title is None:
@@ -100,13 +114,20 @@ def plot_sequence(
         ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H %p"))
         ax.xaxis.set_minor_locator(mdates.MinuteLocator(interval=15))
-    ax.plot(time, value, data=subset)
-    ax.fill_between(x=time, y1=value, data=subset, alpha=0.65)
+    if time_is_index:
+        ax.plot(value, data=subset)
+        if fill:
+            ax.fill_between(x=subset.index, y1=value, data=subset, alpha=0.65)
+    else:
+        ax.plot(time, value, data=subset)
+        if fill:
+            ax.fill_between(x=time, y1=value, data=subset, alpha=0.65)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
     plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
     fig.autofmt_xdate()
+    sns.despine()
     plt.show()
 
 
