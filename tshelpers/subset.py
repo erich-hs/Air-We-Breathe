@@ -34,9 +34,20 @@ def subset_interval(
     days_later: Amount of days to subset after the missing_type interval.
     returns: (start_date, end_date) sequence.
     """
+    if type(data.index) == pd.core.indexes.datetimes.DatetimeIndex:
+        time_index = data.index
+        time_is_index = 1
+    else:
+        try:
+            min(data[time])
+        except KeyError:
+            print(f"Dataframe index is not a DateTime object. Please specify a valid column for argument time.")
+        time_index = data[time]
+        time_is_index = 0
+
     # Assert time column of data is a datetime object
     assert pd.api.types.is_datetime64_any_dtype(
-        data[time]
+        time_index
     ), f"Column {time} should be of date time format."
     assert missing_type.upper() in [
         "IMV",
@@ -55,7 +66,10 @@ def subset_interval(
         )
 
     # Initializing start and end intervals, indices, star, and end lists
-    start = min(subset[time])
+    if time_is_index:
+        start = min(subset.index)
+    else:
+        start = min(subset[time])
     end = 0
     indices = []
     start_list = []
@@ -106,7 +120,6 @@ def subset_interval(
     end_date = end_list[sequence_no]
     start_date_exp = start_date - timedelta(days=days_prior)
     end_date_exp = end_date + timedelta(days=days_later)
-
     try:
         # Checking for end date falling within a missing sequence
         if (end_date_exp >= start_list[sequence_no + 1]) and (
@@ -146,21 +159,21 @@ def subset_interval(
 
     # Checking for start and end dates falling outside original dataset time range
     # if start_date_exp < min(subset[time]):
-    if start_date_exp < min(data[time]):
+    if start_date_exp < min(time_index):
         if verbose:
             print(
                 f"WARNING: Sequence start exceeds subset limit. Truncating to subset start date..."
             )
         # start_date_exp = min(subset[time]) - timedelta(days=days_prior)
-        start_date_exp = min(data[time])
+        start_date_exp = min(time_index)
     # if end_date_exp > max(subset[time]):
-    if end_date_exp > max(data[time]):
+    if end_date_exp > max(time_index):
         if verbose:
             print(
                 f"WARNING: Sequence end exceeds subset limit. Truncating to subset end date..."
             )
         # end_date_exp = max(subset[time]) + timedelta(days=days_later)
-        end_date_exp = max(data[time])
+        end_date_exp = max(time_index)
 
     if verbose:
         print(f"Final interval{(str(start_date_exp), str(end_date_exp))}")

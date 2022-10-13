@@ -92,7 +92,7 @@ def plot_sequence(
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%b, %Y"))
         ax.xaxis.set_minor_locator(mdates.DayLocator(interval=7))
     # > Monthly format
-    elif days_total > 30:
+    elif days_total > 35:
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=15))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
         ax.xaxis.set_minor_locator(mdates.DayLocator())
@@ -499,4 +499,43 @@ def plot_multiple_pacf(data,
                 fontsize=10,
                 fontweight="bold")
     plt.xlim([0, lags+0.5])
+    plt.show()
+
+
+def plot_correlation(data,
+                     columns,
+                     plot_title=None):
+    '''
+    Plot a correlation matrix with pearson correlation values on top diagonal and
+    correlation scatterplox on bottom diagonal.
+    data: Pandas Dataframe with numeric columns.
+    columns: Columns to plot correlation from data.
+    plot_title: Plot title.
+    '''
+    # Plot Title
+    if plot_title is None:
+        plot_title = "Correlation Matrix"
+
+    # Correlation dots
+    def corrdot(*args, **kwargs):
+        corr_r = args[0].corr(args[1], 'pearson')
+        corr_text = f"{corr_r:2.2f}".replace("0.", ".")
+        ax = plt.gca()
+        ax.set_axis_off()
+        marker_size = abs(corr_r) * 7000
+        ax.scatter([.5], [.5], marker_size, [corr_r], alpha=0.6, cmap="mako",
+                vmin=-1, vmax=1, transform=ax.transAxes)
+        font_size = abs(corr_r) * 30
+        ax.annotate(corr_text, [.5, .5,],  xycoords="axes fraction",
+                    ha='center', va='center', fontsize=font_size)
+
+    # PairGrid plot
+    sns.set_theme(style="ticks", palette="mako")
+    g = sns.PairGrid(data[columns],
+                    aspect=1.5,                 
+                    diag_sharey=False)
+    g.map_lower(sns.regplot, marker="+", lowess=True, ci=False, line_kws={'color':'darkblue'})
+    g.map_diag(sns.distplot, kde_kws={'color':'darkblue'})
+    g.map_upper(corrdot)
+    plt.suptitle(plot_title, fontsize=16, fontweight="bold")
     plt.show()
