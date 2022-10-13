@@ -18,6 +18,8 @@ def subset_interval(
     verbose=True,
 ):
     """
+    TODO: Refactor to consider datetime index!
+
     Subset timeseries interval around an Individual Missing Value (IMV) or
     a Continuous Missing Sample (CMS):
     data: Pandas DataFrame with a time series and a value column.
@@ -169,8 +171,8 @@ def subset_interval(
 # Auxiliar function to generate artificially missing data
 def create_missing(
     data,
-    time="DATE_PST",
-    value="RAW_VALUE",
+    time=None,
+    value=None,
     start=None,
     end=None,
     missing_length=1,
@@ -191,33 +193,44 @@ def create_missing(
     start and end arguments, and df_missing is a copy of subset with missing
     data.
     """
+    if type(data.index) == pd.core.indexes.datetimes.DatetimeIndex:
+        time_index = data.index
+        time_is_index = 1
+    else:
+        try:
+            min(data[time])
+        except KeyError:
+            print(f"Dataframe index is not a DateTime object. Please specify a valid column for argument time.")
+        time_index = data[time]
+        time_is_index = 0
+
     # Assert time column of data is a datetime object
     assert pd.api.types.is_datetime64_any_dtype(
-        data[time]
-    ), f"Column {time} should be of date time format."
+        time_index
+    ), f"{data} index or time column {time} should be of date time format."
 
     if start is None:
-        start = min(data[time])
+        start = min(time_index)
     if end is None:
-        end = max(data[time])
+        end = max(time_index)
 
     assert end > start, f"End date should be higher than start date."
     assert (end - start) < (
-        max(data[time]) - min(data[time])
+        max(time_index) - min(time_index)
     ), f"Sequence length should not exceed subset {time} length."
 
     # Interval to subset
-    if start <= min(data[time]):
+    if start <= min(time_index):
         print(
             "WARNING: Series' start exceeds subset limit. Truncating to subset start date..."
         )
-        start = min(data[time])
-    if end >= max(data[time]):
+        start = min(time_index)
+    if end >= max(time_index):
         print(
             "WARNING: Series' end exceeds subset limit. Truncating to subset end date..."
         )
-        end = max(data[time])
-    subset = data[(data[time] >= start) & (data[time] <= end)]
+        end = max(time_index)
+    subset = data[(time_index >= start) & (time_index <= end)]
 
     # Looking for missing value on original subset
     tot_missing = subset[value].isna().sum()

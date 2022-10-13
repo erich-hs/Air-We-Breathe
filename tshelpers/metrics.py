@@ -1,8 +1,11 @@
+import warnings
 import numpy as np
 import pandas as pd
 from statsmodels.tsa.stattools import adfuller, kpss
 
-def rmse_score(data, data_missing, value="RAW_VALUE"):
+warnings.filterwarnings("ignore")
+
+def rmse_score(data, data_missing, value=None):
     """
     data: Pandas DataFrame with a time series and a value column.
     data_missing: Pandas DataFrame with a time series and a value column.
