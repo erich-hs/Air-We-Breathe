@@ -5,6 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
+from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
 
 # Auxiliar function to plot a subset
 def plot_sequence(
@@ -392,4 +393,59 @@ def plot_missing(data,
     ax.set_title(plot_title, y=1.08, fontsize=font_size, fontweight="bold")
     plt.suptitle(plot_sup_title, y=0.94, fontsize=font_size - 1)
     fig.autofmt_xdate()
+    plt.show()
+
+def plot_multiple_pacf(data,
+                       columns,
+                       lags=15,
+                       start=None,
+                       end=None,
+                       plot_title=None,
+                       x_label=None):
+    '''
+    Plot Partial Autocorrelation PACF (left) and Autocorrelation ACF (right) estimates
+    for data over passed columns.
+    data: Pandas DataFrame with a time series and a value column.
+    columns: Columns with value variables to plot.
+    lags: Number of lags to plot PACF and ACF estimates.
+    start: Start date for interval.
+    end: End date for interval.
+    plot_title: Plot title.
+    x_label: X Axis plot label.
+    '''
+    if plot_title == None:
+        plot_title="PACF (left) and ACF (right) plots"
+    if x_label == None:
+        x_label="Lags"
+    fig, axs = plt.subplots(len(columns), 2, sharex=True, sharey=True, figsize=(9, 9))
+    for i, column in enumerate(data[columns]):
+        for j in [0, 1]:
+            args = {
+            "x": data[start:end][column],
+            "lags": lags,
+            "method": "yw",
+            "ax": axs[i, j],
+            "title": "",
+            "zero": False
+            }
+            if j == 0:
+                # Partial Autocorrelation Function plot
+                p = plot_pacf(**args)
+                title = f"{column.replace('_', ' ')[:-4] + ' [PACF]'}"
+            elif j == 1:
+                # Autocorrelation Function plot without "method" parameter
+                p = plot_acf(**{parameter:args[parameter] for parameter in args if parameter!='method'})
+                title = f"{column.replace('_', ' ')[:-4] + ' [ACF]'}"
+            axs[i, j].xaxis.set_major_locator(ticker.MultipleLocator(1))
+            axs[i, j].tick_params(labelsize=9)
+            axs[i, j].set_title(title, fontsize=10, y=0.9)
+            sns.despine()
+            p.set_tight_layout(1)
+            if i == len(data[columns].columns) - 1:
+                axs[i, j].set_xlabel(x_label, fontsize=10)
+    plt.suptitle(plot_title,
+                y=0.97,
+                fontsize=10,
+                fontweight="bold")
+    plt.xlim([0, lags+0.5])
     plt.show()
