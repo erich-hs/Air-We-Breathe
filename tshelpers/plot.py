@@ -506,7 +506,7 @@ def plot_correlation(data,
                      columns,
                      plot_title=None):
     '''
-    Plot a correlation matrix with pearson correlation values on top diagonal and
+    Plot a correlogram with pearson correlation values on top diagonal and
     correlation scatterplox on bottom diagonal.
     data: Pandas Dataframe with numeric columns.
     columns: Columns to plot correlation from data.
@@ -514,7 +514,7 @@ def plot_correlation(data,
     '''
     # Plot Title
     if plot_title is None:
-        plot_title = "Correlation Matrix"
+        plot_title = "Correlogram"
 
     # Correlation dots
     def corrdot(*args, **kwargs):
