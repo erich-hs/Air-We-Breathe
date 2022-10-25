@@ -7,7 +7,7 @@ from datetime import timedelta
 def subset_interval(
     data,
     time="DATE_PST",
-    value="RAW_VALUE",
+    value="PM 2.5",
     column_type_missing="MISSING_SAMPLE",
     column_missing="MISSING",
     column_missing_sequence="MISSING_SEQ",
@@ -18,8 +18,6 @@ def subset_interval(
     verbose=True,
 ):
     """
-    TODO: Refactor to consider datetime index!
-
     Subset timeseries interval around an Individual Missing Value (IMV) or
     a Continuous Missing Sample (CMS):
     data: Pandas DataFrame with a time series and a value column.
@@ -34,6 +32,9 @@ def subset_interval(
     days_later: Amount of days to subset after the missing_type interval.
     returns: (start_date, end_date) sequence.
     """
+    # Reset index to numeric value
+    data = data.reset_index(inplace=False)
+
     if type(data.index) == pd.core.indexes.datetimes.DatetimeIndex:
         time_index = data.index
         time_is_index = 1
@@ -48,7 +49,7 @@ def subset_interval(
     # Assert time column of data is a datetime object
     assert pd.api.types.is_datetime64_any_dtype(
         time_index
-    ), f"Column {time} should be of date time format."
+    ), f"{data} index or column {time} should be of date time format."
     assert missing_type.upper() in [
         "IMV",
         "CMS",
@@ -65,7 +66,7 @@ def subset_interval(
             "Invalid or non-defined value type! Please select between: 'IMV' or 'CMS'"
         )
 
-    # Initializing start and end intervals, indices, star, and end lists
+    # Initializing start and end intervals, indices, start, and end lists
     if time_is_index:
         start = min(subset.index)
     else:
@@ -191,6 +192,7 @@ def create_missing(
     missing_length=1,
     missing_index="end",
     padding=24,
+    verbose=True,
 ):
     """
     data: Pandas DataFrame with a time series and a value column.
@@ -208,14 +210,12 @@ def create_missing(
     """
     if type(data.index) == pd.core.indexes.datetimes.DatetimeIndex:
         time_index = data.index
-        time_is_index = 1
     else:
         try:
             min(data[time])
         except KeyError:
             print(f"Dataframe index is not a DateTime object. Please specify a valid column for argument time.")
         time_index = data[time]
-        time_is_index = 0
 
     # Assert time column of data is a datetime object
     assert pd.api.types.is_datetime64_any_dtype(
@@ -228,20 +228,22 @@ def create_missing(
         end = max(time_index)
 
     assert end > start, f"End date should be higher than start date."
-    assert (end - start) < (
+    assert (end - start) <= (
         max(time_index) - min(time_index)
     ), f"Sequence length should not exceed subset {time} length."
 
     # Interval to subset
-    if start <= min(time_index):
-        print(
-            "WARNING: Series' start exceeds subset limit. Truncating to subset start date..."
-        )
+    if start < min(time_index):
+        if verbose:
+            print(
+                "WARNING: Series' start exceeds subset limit. Truncating to subset start date..."
+            )
         start = min(time_index)
-    if end >= max(time_index):
-        print(
-            "WARNING: Series' end exceeds subset limit. Truncating to subset end date..."
-        )
+    if end > max(time_index):
+        if verbose:
+            print(
+                "WARNING: Series' end exceeds subset limit. Truncating to subset end date..."
+            )
         end = max(time_index)
     subset = data[(time_index >= start) & (time_index <= end)]
 

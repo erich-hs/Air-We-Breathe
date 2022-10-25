@@ -5,7 +5,19 @@ from statsmodels.tsa.stattools import adfuller, kpss
 
 warnings.filterwarnings("ignore")
 
-def rmse_score(data, data_missing, value=None):
+def mse_score(data, data_missing, value=None, verbose=True):
+    """
+    data: Pandas DataFrame with a time series and a value column.
+    data_missing: Pandas DataFrame with a time series and a value column.
+    value: Value variable or list of variables to subset with date column.
+    returns: a list of scores
+    """
+    mse = np.mean((data[value] - data_missing[value]) ** 2)
+    if verbose:
+        print(f"RMSE for {value}: {mse:.4f}")
+    return mse
+
+def rmse_score(data, data_missing, value=None, verbose=True):
     """
     data: Pandas DataFrame with a time series and a value column.
     data_missing: Pandas DataFrame with a time series and a value column.
@@ -13,7 +25,8 @@ def rmse_score(data, data_missing, value=None):
     returns: a list of scores
     """
     rmse = np.sqrt(np.mean((data[value] - data_missing[value]) ** 2))
-    print(f"RMSE for {value}: {rmse:.4f}")
+    if verbose:
+        print(f"RMSE for {value}: {rmse:.4f}")
     return rmse
 
 def stationarity_test(data,

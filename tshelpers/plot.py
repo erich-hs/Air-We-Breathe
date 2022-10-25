@@ -365,6 +365,7 @@ def plot_compare(
     plt.legend(loc="upper right", fontsize=font_size)
     plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
     fig.autofmt_xdate()
+    sns.despine()
     plt.show()
 
 def plot_missing(data,
