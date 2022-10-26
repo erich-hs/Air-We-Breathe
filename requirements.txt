@@ -1,2 +1,1 @@
-fastai==2.7.9
 black[jupyter]
