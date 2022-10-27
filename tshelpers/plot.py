@@ -363,7 +363,7 @@ def plot_compare(
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_title(plot_title, y=1.05, fontsize=font_size, fontweight="bold")
-    plt.legend(loc="upper right", fontsize=font_size)
+    plt.legend(loc="best", fontsize=font_size)
     plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
     fig.autofmt_xdate()
     sns.despine()
