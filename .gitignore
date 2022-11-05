@@ -1,5 +1,6 @@
 # Extra
 data/raw
+.awb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
