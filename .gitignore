@@ -2,6 +2,7 @@
 data/raw
 .awb
 results/
+darts_logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
