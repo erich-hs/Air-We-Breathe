@@ -1,7 +1,5 @@
 install:
 	pip install --upgrade pip &&\
-		conda env create -f environment.yml
-		conda update -n base -c defaults conda -y
 		pip install -r requirements.txt
 
 format:
