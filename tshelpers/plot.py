@@ -24,7 +24,8 @@ def plot_sequence(
     font_size=12,
     figsize=(15, 5),
     palette="mako",
-    style="ticks"
+    style="ticks",
+    savefig=False
 ):
     """
     Plot times series subset within passed start and end date interval.
@@ -131,7 +132,10 @@ def plot_sequence(
     plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
     fig.autofmt_xdate()
     sns.despine()
-    plt.show()
+    if savefig:
+        plt.savefig(savefig, bbox_inches="tight")
+    else:
+        plt.show()
 
 
 # Auxiliar function to plot overlaying subsets
@@ -157,6 +161,7 @@ def plot_compare(
     plot_sup_title=None,
     font_size=12,
     figsize=(15, 5),
+    savefig=False
 ):
     """
     TODO:
@@ -367,7 +372,10 @@ def plot_compare(
     plt.suptitle(plot_sup_title, y=0.92, fontsize=font_size - 1)
     fig.autofmt_xdate()
     sns.despine()
-    plt.show()
+    if savefig:
+        plt.savefig(savefig, bbox_inches="tight")
+    else:
+        plt.show()
 
 def plot_missing(data,
                  start=None,
