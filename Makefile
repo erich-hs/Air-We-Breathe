@@ -1,15 +1,12 @@
 install:
-	pip install --upgrade pip &&\
-		pip install -r requirements.txt
+	python -m pip install --upgrade pip &&\
+	python -m pip install -e .[dev]
+
+lint:
+	echo 'Not implemented'
+
+test:
+	echo 'Not implemented'
 
 format:
-	black *.ipynb
-	black tshelpers/*.py
-
-#lint:
-#	pylint --disable=R,C app.py
-
-# test:
-#	#python -m pytest -vv test_flask_app.py
-
-all: install format lint test
+	black awb/*.py

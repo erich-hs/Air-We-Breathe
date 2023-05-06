@@ -1,9 +1,7 @@
-# Extra
-data/raw
-.awb
-results/
-darts_logs/
-models/*.pickle
+# Others
+legacy_structure/
+data/
+!awb/data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

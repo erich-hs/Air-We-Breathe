@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "air_we_breathe"
+version = "0.0.1"
+authors = [
+  { name="Erich Henrique", email="erich.hs13@gmail.com" },
+]
+description = "Research on nonstationary univariate time series modelling for missing value imputation on air quality datasets."
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["Time Series", "Transformers", "Imputation", "LSTM", "XGboost", "Meta Learner"]
+license = { text = "MIT" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy<=1.24.2,>=1.11.3",
+    "pandas<=1.5.3,>=0.25.0",
+    "torch==2.0.0",
+    "lightning==2.0.2",
+]
+
+[tool.setuptools]
+packages = ["awb"]
+
+[project.optional-dependencies]
+dev = [
+    "pip-tools",
+    "pytest",
+    "pytest-cov",
+    "pylint",
+    "pre-commit",
+    "black",
+]
+
+[project.scripts]
+train = "awb.app.training:run"
+predict = "awb.app.inference:run"
+
+[project.urls]
+"Homepage" = "https://github.com/erich-hs/Air-We-Breathe"
+"Bug Tracker" = "https://github.com/erich-hs/Air-We-Breathe/issues"
