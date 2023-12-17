@@ -1,0 +1,9 @@
+numpy
+pandas
+seaborn
+matplotlib
+scipy
+ipykernel
+tabulate
+statsmodels
+tqdm
