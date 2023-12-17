@@ -8,9 +8,9 @@ def subset_interval(
     data,
     time="DATE_PST",
     value="PM 2.5",
-    column_type_missing="MISSING_SAMPLE",
-    column_missing="MISSING",
-    column_missing_sequence="MISSING_SEQ",
+    column_type_missing="isCMV",
+    column_missing="isMissing",
+    column_missing_sequence="seqMissing",
     missing_type=None,
     sequence_no=0,
     days_prior=5,
@@ -19,14 +19,14 @@ def subset_interval(
 ):
     """
     Subset timeseries interval around an Individual Missing Value (IMV) or
-    a Continuous Missing Sample (CMS):
+    a Continuous Missing Variable (CMV):
     data: Pandas DataFrame with a time series and a value column.
     time: DateTime variable in the dataset.
     value: Value variable or list of variables to subset with date column.
-    column_type_missing: Variable that stores missing value type.
+    column_type_missing: Variable that stores CMV indicator.
     column_missing: Dummy variable that stores missing value indicator.
     column_missing_sequence: Variable that stores length of current missing sequence.
-    missing_type: Type of missing value to search for. Either 'IMV' or 'CMS'.
+    missing_type: Type of missing value to search for. Either 'IMV' or 'CMV'.
     sequence_no: Which missing interval to use in the sequence of missing_type found.
     days_prior: Amount of days to subset prior to the missing_type interval.
     days_later: Amount of days to subset after the missing_type interval.
@@ -52,18 +52,18 @@ def subset_interval(
     ), f"{data} index or column {time} should be of date time format."
     assert missing_type.upper() in [
         "IMV",
-        "CMS",
-    ], f"missing_type should be 'IMV' or 'CMS', got {missing_type}."
+        "CMV",
+    ], f"missing_type should be 'IMV' or 'CMV', got {missing_type}."
 
     # Subsetting to missing values
     if missing_type == "IMV":
         subset = data[data[column_type_missing] == 0]
         subset = subset[subset[column_missing] == 1]
-    elif missing_type == "CMS":
+    elif missing_type == "CMV":
         subset = data[data[column_type_missing] == 1]
     else:
         return (
-            "Invalid or non-defined value type! Please select between: 'IMV' or 'CMS'"
+            "Invalid or non-defined value type! Please select between: 'IMV' or 'CMV'"
         )
 
     # Initializing start and end intervals, indices, start, and end lists
